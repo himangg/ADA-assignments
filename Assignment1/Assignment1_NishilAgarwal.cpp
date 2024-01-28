@@ -61,7 +61,7 @@ int recur_search(int k, int n, int* arr1, int* arr2,int* arr3,int smallest, int 
     //cout<<r1<<" "<<r2<<" "<<r3<<" "<<k<<" "<<assumed_middle<<endl;
     //Sleep(100);
 
-    if(smallest>=largest){
+    if(smallest==largest){
         return smallest;
     }
     if(total_lesser_or_equal<k){
