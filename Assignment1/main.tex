@@ -3,7 +3,7 @@
 \usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-
+\usepackage{float}
 \usepackage[margin=2.2cm]{geometry}
 \usepackage{hyperref}
 
@@ -32,21 +32,21 @@ The modified binary search for this works in the following manner :
 \\\\
 Further algorithm :
 \\\\
-1)If the 'smallest' becomes larger than or equal to 'largest' we stop immediately. When they become equal it essentially means that we have reached the kth smallest value. If the 'smallest' has become larger than 'largest' then it must be due to repeated value in different arrays. Hence the 'smallest' value will be the answer in either case.
+1)If the 'smallest' becomes equal to 'largest' we stop. When they become equal it essentially means that we have reached the kth smallest value.
 \\\\
 2)If the total is smaller than k, then our “assumed middle” is definitely smaller than the kth smallest element. So, we replace the 'smallest' value used in calculation of the “assumed middle” with the current “assumed middle” and recalculate it. Thus, we can get a higher “assumed middle” value which is possibly closer to the kth smallest element.
 \\\\
 3)If the total is greater than k, then our “assumed middle” is definitely larger than the kth smallest element. So, we replace the 'largest' value used in calculation of the “assumed middle” with the current “assumed middle” and recalculate it. Thus, we can get a lower “assumed middle” value which is possibly closer to kth smallest element.
 \\\\
-We repeat this process until the "assumed middle" becomes nearest to kth smallest value which will come out to be 'smallest' at that instant.
+We repeat this process till 'smallest' becomes equal to 'largest'. At that instant, the smallest'/'largest' is basically the kth smallest value which we return as our answer.
 
 
 \section{Recurrence Relation}
 % Provide the recursive relation of your algorithm
 \begin{center}
-T(n) = T(n/2) + O(log(n)) + c
+T(R) = T(R/2) + O(log(n)) + c
 \end{center}
-We came to the above recurrence relation by analyzing our recursive search function in which, in each function call, we find the "assumed middle" value and compare the number of elements smaller than that "assumed middle" value and according to this comparison which call the same function by inputting half the range in the previous function call. So, it takes T(n/2) time in total. 
+We came to the above recurrence relation by analyzing our recursive search function in which, in each function call, we find the "assumed middle" value and compare the number of elements smaller than that "assumed middle" value. According to this comparison we call the same function recursively after updating the value of 'smallest' or 'largest' to 'assumed middle' in the next iteration. This makes our 'assumed middle' half every time we call the function. So, it takes T(R/2) time in total. Here, R is the initial 'assumed middle'.
 \\\\Here the O(log(n)) part comes from the recursive modified binary search function in which, in each function call, we search to find an index of an element within the list, to the left of which all elements are lesser than the required value. With each recursive call, the size of the list reduces to half, hence requiring half the time.
 \\\\Here, c is the constant time taken for other comparisons and calculations.
 
@@ -56,53 +56,100 @@ The time complexity of this Algorithm is
 \begin{center}
 O(log(n)*log(R))
 \end{center}
-Here R is the range that is the Maximum element - Minimum element.
-\\\\We came to this result since, in our recursive function, we are calling a modified binary search on each list, which itself has a time complexity of O(log(n)). This is because with each iteration of the search the list elements are halved. Also, the recursive function responsible for setting the "Assumed middle" value itself is called log(R) times. Here, diff is the difference between the largest element and the smallest in the Union of the three vectors. This gets called log(diff) times in the worst case because the difference is reduced to half after each function call. The kth smallest number must lie somewhere in between the largest and smallest number in the union.
+Here, n is the size of array.\\
+R is the range that is the Maximum element - Minimum element.
+\\\\We came to this result since, in our recursive function, we are calling a modified binary search on each list, which itself has a time complexity of O(log(n)). This is because with each iteration of the search the list elements are halved. Also, the recursive function responsible for setting the "Assumed middle" value itself is called log(R) times in the worst case. This is because the difference is reduced to half after each function call. The kth smallest number must lie somewhere in between the largest and smallest number in the union.
 \\\\
 Our code only has a few temporary variables and no extra space has been used for storing anything. Thus, the space complexity of our algorithm is O(1).
 
 \section{Pseudocode}
 
-
 \begin{algorithm}
-\caption{Binary Search}
+\textbf{Auxiliary Functions}
+\hrule
 \begin{algorithmic}[1]
-\Function{BinarySearch}{$arr, low, high, value$}
+\Function{largest3}{$num1, num2, num3$}
+    \Comment{Returns largest of given 3 numbers}
+    \State \Return $\max(\max(num1, num2), num3)$
+\EndFunction
+
+\Function{smallest3}{$num1, num2, num3$}
+    \Comment{Returns smallest of given 3 numbers}
+    \State \Return $\min(\min(num1, num2), num3)$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Modified Binary Search}
+\begin{algorithmic}[1]
+\Function{modif\_bins}{$arr, value, low, high$}
     \State $mid \gets (low + high) / 2$
     \If{$low > high$}
         \If{$low = 0$}
             \State \Return $mid$
+        \Else
+            \State \Return $mid + 1$
         \EndIf
-        \State \Return $mid + 1$
     \ElsIf{$mid = 0$}
         \If{$arr[mid] > value$}
-            \State \Return $0$
+            \State \Return $0$ \Comment{No element smaller than value in array}
         \Else
-            \State \Return $1$
+            \State \Return $1$ \Comment{The smallest element in array is smaller than value}
         \EndIf
     \ElsIf{$arr[mid] \geq value$ and $arr[mid - 1] \leq value$}
         \If{$arr[mid] = value$}
-            \State \Return $mid + 1$
+            \State \Return $mid + 1$ \Comment{All elements till index 'mid' are smaller}
+        \Else
+            \State \Return $mid$ \Comment{All elements till index 'mid-1' are smaller}
         \EndIf
-        \State \Return $mid$
     \ElsIf{$arr[mid] < value$ and $arr[mid - 1] < value$}
-        \State \Return \Call{BinarySearch}{$arr, mid+1, high, value$}
+        \State \Return \Call{modif\_bins}{$arr, value, mid+1, high$}
     \ElsIf{$arr[mid] > value$ and $arr[mid - 1] > value$}
-        \State \Return \Call{BinarySearch}{$arr, low, mid-1, value$}
+        \State \Return \Call{modif\_bins}{$arr, value, low, mid-1$}
     \EndIf
 \EndFunction
 \end{algorithmic}
-
-% Repeat the above structure for other functions
-
 \end{algorithm}
+
+\begin{algorithm}
+\textbf{Recursive ``Assumed middle'' kth value nearing function}
+\hrule
+\begin{algorithmic}[1]
+\Function{recur\_search}{$k, n, arr1, arr2, arr3, smallest, largest$}\\
+    \Comment{Initially, smallest and largest are passed by auxiliary function, and initial and final values of each list}
+    \State $\textbf{assumed\_middle} \gets (largest + smallest) / 2$
+    \If{($smallest+largest$) $<$ 0}
+        \State $\textbf{assumed\_middle} \gets (largest + smallest-1) / 2$
+    \EndIf
+    \State $\textbf{r1} \gets$ \Call{modif\_bins}{$arr1, 0, n-1, assumed\_middle$} \\
+    \Comment{Count of elements smaller than assumed\_middle in array 1}
+    \State $\textbf{r2} \gets$ \Call{modif\_bins}{$arr2, 0, n-1, assumed\_middle$}
+    \State $\textbf{r3} \gets$ \Call{modif\_bins}{$arr3, 0, n-1, assumed\_middle$}
+    \State $\textbf{total} \gets r1 + r2 + r3$ \\
+    \Comment{Total number of elements in all arrays altogether which are lesser than assumed\_middle}
+    
+    \If{$smallest = largest$}
+        \State \Return $smallest$ \\
+        \Comment{kth smallest value found}
+    \ElsIf{$total > k$}
+        \State \Return \Call{recur\_search}{$k, n, arr1, arr2, arr3, assumed\_middle+1, largest$} \\
+        \Comment{Assumed value is still larger than kth smallest}
+    \ElsIf{$total < k$}
+        \State \Return \Call{recur\_search}{$k, n, arr1, arr2, arr3, smallest, assumed\_middle$} \\
+        \Comment{Assumed value is still smaller than kth smallest}
+    \EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
 
 \section{Proof of Correctness}
 % Provide the proof of correctness for your algorithm
-In this question we calculate a value called “Assumed middle” and continuously, recursively try to take it closer to kth smallest number. This is very accurate as our modified binary search checks at each step if our “Assumed middle” value is getting closer to kth smallest number or getting away from it. We check this by counting a total number of elements lesser than the “assumed middle” in all the arrays. Our approach is to make this total number of elements equal to k to get the kth smallest number. We also terminate further recursions if the smaller bound of the "assumed middle" passes larger bound. (i.e., the solution has been found already)
+In this question we calculate a value called “Assumed middle” and continuously, recursively try to take it closer to kth smallest number. This is very accurate as our modified binary search checks at each step if our “Assumed middle” value is getting closer to kth smallest number or getting away from it. We check this by counting a total number of elements lesser than the “assumed middle” in all the arrays. Our approach is to make this total number of elements equal to k to get the kth smallest number. We also terminate further recursions if the smaller bound of the "assumed middle" becomes equal to larger bound. (i.e., the solution has been found already)
 \\\\
 Our c++ Code (already tested with many test cases) is:
 \\\\
-\url{https://drive.google.com/file/d/1I5XO7lnqDE_VFWtFU5wc9tymI8bZSwAR/view?usp=sharing}
+\url{https://drive.google.com/file/d/1yEaf5MxFe7N6iTk39s7CDRii3F3ScC3P/view?usp=sharing}
 
 \end{document}
