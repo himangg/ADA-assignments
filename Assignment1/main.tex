@@ -1,0 +1,108 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{hyperref}
+
+\title{Theory Assignment-1: ADA Winter-2024}
+\author{Himang Chandra Garg (2022214) \and Nishil Agarwal (2022334)}
+
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Preprocessing}
+% Your preprocessing steps go here
+Not Applicable in this Algorithm.
+
+\section{Algorithm Description}
+% Describe your algorithm here
+We have used a modified binary search algorithm to solve the problem.
+\\\\
+First, we find the largest and the smallest of all three arrays altogether by comparing the initial and final values of the arrays. We then use the 'largest' and 'smallest' values to find an average value of them and call this value an “assumed middle” value. After that, we count the total number of elements in each array that are smaller than this middle value. 
+\\\\
+We aim to bring the “assumed middle” value nearest to the kth smallest element. We achieve this by trying to get the 'smallest' and 'largest' values closer to kth smallest element through recursion. As a result, their average i.e. "assumed middle" gets closer to the kth value. We monitor the closeness of these values to kth smallest number by ensuring that, the total number of values in all arrays altogether that are lesser than the "assumed value" is nearing to k.
+\\\\
+The modified binary search for this works in the following manner : 
+\\\\ We divide the array size in half and check if the “assumed middle” value lies to the left or right half of the array (We stop immediately if it lies right in the middle). Recursively, we divide the array into half again and choose the half containing values near to “assumed middle.” We continue this until the size of the array becomes one, indicating that we have reached the nearest value to the “assumed value,” which we call, let’s say - GUESS.
+\\\\
+Further algorithm :
+\\\\
+1)If the 'smallest' becomes larger than or equal to 'largest' we stop immediately. When they become equal it essentially means that we have reached the kth smallest value. If the 'smallest' has become larger than 'largest' then it must be due to repeated value in different arrays. Hence the 'smallest' value will be the answer in either case.
+\\\\
+2)If the total is smaller than k, then our “assumed middle” is definitely smaller than the kth smallest element. So, we replace the 'smallest' value used in calculation of the “assumed middle” with the current “assumed middle” and recalculate it. Thus, we can get a higher “assumed middle” value which is possibly closer to the kth smallest element.
+\\\\
+3)If the total is greater than k, then our “assumed middle” is definitely larger than the kth smallest element. So, we replace the 'largest' value used in calculation of the “assumed middle” with the current “assumed middle” and recalculate it. Thus, we can get a lower “assumed middle” value which is possibly closer to kth smallest element.
+\\\\
+We repeat this process until the "assumed middle" becomes nearest to kth smallest value which will come out to be 'smallest' at that instant.
+
+
+\section{Recurrence Relation}
+% Provide the recursive relation of your algorithm
+\begin{center}
+T(n) = T(n/2) + O(log(n)) + c
+\end{center}
+We came to the above recurrence relation by analyzing our recursive search function in which, in each function call, we find the "assumed middle" value and compare the number of elements smaller than that "assumed middle" value and according to this comparison which call the same function by inputting half the range in the previous function call. So, it takes T(n/2) time in total. 
+\\\\Here the O(log(n)) part comes from the recursive modified binary search function in which, in each function call, we search to find an index of an element within the list, to the left of which all elements are lesser than the required value. With each recursive call, the size of the list reduces to half, hence requiring half the time.
+\\\\Here, c is the constant time taken for other comparisons and calculations.
+
+\section{Complexity Analysis}
+% Analyze the time and space complexity of your algorithm
+The time complexity of this Algorithm is
+\begin{center}
+O(log(n)*log(R))
+\end{center}
+Here R is the range that is the Maximum element - Minimum element.
+\\\\We came to this result since, in our recursive function, we are calling a modified binary search on each list, which itself has a time complexity of O(log(n)). This is because with each iteration of the search the list elements are halved. Also, the recursive function responsible for setting the "Assumed middle" value itself is called log(R) times. Here, diff is the difference between the largest element and the smallest in the Union of the three vectors. This gets called log(diff) times in the worst case because the difference is reduced to half after each function call. The kth smallest number must lie somewhere in between the largest and smallest number in the union.
+\\\\
+Our code only has a few temporary variables and no extra space has been used for storing anything. Thus, the space complexity of our algorithm is O(1).
+
+\section{Pseudocode}
+
+
+\begin{algorithm}
+\caption{Binary Search}
+\begin{algorithmic}[1]
+\Function{BinarySearch}{$arr, low, high, value$}
+    \State $mid \gets (low + high) / 2$
+    \If{$low > high$}
+        \If{$low = 0$}
+            \State \Return $mid$
+        \EndIf
+        \State \Return $mid + 1$
+    \ElsIf{$mid = 0$}
+        \If{$arr[mid] > value$}
+            \State \Return $0$
+        \Else
+            \State \Return $1$
+        \EndIf
+    \ElsIf{$arr[mid] \geq value$ and $arr[mid - 1] \leq value$}
+        \If{$arr[mid] = value$}
+            \State \Return $mid + 1$
+        \EndIf
+        \State \Return $mid$
+    \ElsIf{$arr[mid] < value$ and $arr[mid - 1] < value$}
+        \State \Return \Call{BinarySearch}{$arr, mid+1, high, value$}
+    \ElsIf{$arr[mid] > value$ and $arr[mid - 1] > value$}
+        \State \Return \Call{BinarySearch}{$arr, low, mid-1, value$}
+    \EndIf
+\EndFunction
+\end{algorithmic}
+
+% Repeat the above structure for other functions
+
+\end{algorithm}
+
+\section{Proof of Correctness}
+% Provide the proof of correctness for your algorithm
+In this question we calculate a value called “Assumed middle” and continuously, recursively try to take it closer to kth smallest number. This is very accurate as our modified binary search checks at each step if our “Assumed middle” value is getting closer to kth smallest number or getting away from it. We check this by counting a total number of elements lesser than the “assumed middle” in all the arrays. Our approach is to make this total number of elements equal to k to get the kth smallest number. We also terminate further recursions if the smaller bound of the "assumed middle" passes larger bound. (i.e., the solution has been found already)
+\\\\
+Our c++ Code (already tested with many test cases) is:
+\\\\
+\url{https://drive.google.com/file/d/1I5XO7lnqDE_VFWtFU5wc9tymI8bZSwAR/view?usp=sharing}
+
+\end{document}
