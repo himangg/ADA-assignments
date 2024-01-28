@@ -9,7 +9,7 @@ int modif_bins(int* arr, int low, int high, int value){
     //cout<<low<<" "<<mid<<" "<<high<<endl;
     if(low>high){
         if (low==0){
-            return mid;
+            return 0;
         }
         return  mid+1;
     }else if(mid==0){
@@ -53,6 +53,9 @@ int smallest3(int n1, int n2, int n3) {
 
 int recur_search(int k, int n, int* arr1, int* arr2,int* arr3,int smallest, int largest){
     int assumed_middle=(largest+smallest)/2;
+    if (largest+smallest<0){
+        assumed_middle=(largest+smallest-1)/2;
+    }
     int r1=modif_bins(arr1,0,n-1,assumed_middle);
     int r2=modif_bins(arr2,0,n-1,assumed_middle);
     int r3=modif_bins(arr3,0,n-1,assumed_middle);
@@ -84,7 +87,7 @@ int main()
     int* array3=(int*)malloc(sizeof(int)*5);
 
     for (int i=0; i<5; i++){
-        array1[i]=i+1;
+        array1[i]=i-1;
     }
 
     for (int i=0; i<5; i++){
