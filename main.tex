@@ -1,0 +1,166 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{hyperref}
+
+\title{Theory Assignment-2: ADA Winter-2024}
+\author{Himang Chandra Garg (2022214) \and Nishil Agarwal (2022334)}
+
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Preprocessing}
+% Your preprocessing steps go here
+Not Applicable in this Algorithm.
+
+\section{Subproblem}
+We calculate these 2 values at each step of loop :\\\\
+dp[i][0] = The maximum number of chickens Mr.Fox has collected till ith booth if he says Ring at ith booth.\\\\
+dp[i][1] = The maximum number of chickens Mr.Fox has collected till ith booth if he says Ding at ith booth.\\\\
+Here, the indexing starts from 0.
+
+\section{Reccurrence of Subproblem }
+$dp[i][0] = \max \left\{
+\begin{array}{ll}
+dp[i - 1][1] + v[i]\\
+dp[i - 2][1] + v[i - 1] + v[i]\\
+dp[i - 3][1] + v[i - 2] + v[i - 1] + v[i]
+\end{array}
+\right\}$
+\\\\
+$dp[i][1] = \max \left\{
+\begin{array}{ll}
+dp[i - 1][0] - v[i]\\
+dp[i - 2][0] - v[i - 1] - v[i]\\
+dp[i - 3][0] - v[i - 2] - v[i - 1] - v[i]
+\end{array}
+\right\}$
+
+
+\section{Base Case}
+$dp[0][0] \leftarrow v[0]$\\\\
+$dp[0][1] \leftarrow -v[0]$\\\\
+$dp[1][0] \leftarrow \max\left\{
+\begin{array}{l}
+v[0] + v[1]\\
+-v[0] + v[1]
+\end{array}
+\right\}$
+\\\\
+$dp[1][1] \leftarrow \max\left\{
+\begin{array}{l}
+-v[0] - v[1]\\
+v[0] - v[1]
+\end{array}
+\right\}$
+\\\\
+$dp[2][0] \leftarrow \max\left\{
+\begin{array}{ll}
+v[0] + v[1] + v[2]\\
+dp[0][1] + v[1] + v[2]\\
+dp[1][1] + v[2]
+\end{array}
+\right\}$\\\\
+$dp[2][1] \leftarrow \max\left\{
+\begin{array}{ll}
+-v[0] - v[1] - v[2]\\
+dp[0][0] - v[1] - v[2]\\
+dp[1][0] - v[2]
+\end{array}
+\right\}$
+\section{Subproblem that solves the final problem }
+$\max \left\{
+\begin{array}{ll}
+dp[n-1][0]\\
+dp[n-1][1]
+\end{array}
+\right\}$
+
+\section{Algorithm Description}
+% Describe your algorithm here
+We have used tabularization or a bottom-up approach of Dynamic Programming using a 2-D array.\\\\
+Here, the ith element of our dp vector is a pair of elements where the first element represents the maximum number of chickens Mr.Fox currently has if he chooses Ring on the ith booth and similarly, the second element represents the maximum number of chickens he currently has if he chooses Ding on the ith booth.
+\\\\
+Let us suppose, he chooses Ring at the ith booth, then one of these 3 cases must have arisen:
+\\
+\\1. he had chosen Ding at i-1 booth.
+\\2. if not, then he had chosen Ding at the i-2 booth.
+\\3. if not, then he had chosen Ding at the i-3 booth.
+\\\\
+We choose the maximum of these 3 cases by using our previous results of Ding stored in the dp vector and storing that in the current entry of Ring. We use self-written max functions for this.
+\\\\
+Similarly, we can calculate the current entry if he had chosen Ding instead.
+\\\\
+We continue this process till the whole given vector is traversed. Then, finally, we return the larger of the 2 elements of dp at n-1\textsuperscript{th} index, which is either when Mr. Fox will Ring or Ding at the last booth.
+
+\section{Runtime Complexity Analysis}
+% Analyze the time and space complexity of your algorithm
+The time complexity of this Algorithm is
+\begin{center}
+O(n)
+\end{center}
+Here, n is the size of the initial vector given to us.\\
+\\We came to this result since our code contains 3 base cases which takes O(1). The max function we have used for comparing 2/3 elements at a time computes result in O(1) time. Finally, a single for loop has been used which iterates from 3 to n-1 which gives us the total time complexity of O(n).
+\section{Pseudocode}
+\begin{algorithm}
+\caption{Max of Two}\label{maxoftwo}
+\begin{algorithmic}[1]
+\Function{maxOfTwo}{$a, b$}
+    \If{$a > b$}
+        \State \Return $a$
+    \Else
+        \State \Return $b$
+    \EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Max of Three}\label{maxofthree}
+\begin{algorithmic}[1]
+\Function{maxOfThree}{$a, b, c$}
+    \If{$a > b$}
+        \If{$a > c$}
+            \State \Return $a$
+        \Else
+            \State \Return $c$
+        \EndIf
+    \Else
+        \If{$b > c$}
+            \State \Return $b$
+        \Else
+            \State \Return $c$
+        \EndIf
+    \EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Solve}\label{solve}
+\begin{algorithmic}[1]
+\Function{solve}{$n, v$}
+    \State Initialize $dp$ as an array of size $n \times 2$, filled with zeros
+    \State $dp[0][0] \gets v[0]$
+    \State $dp[0][1] \gets -v[0]$
+    \State $dp[1][0] \gets \textsc{maxOfTwo}(v[0] + v[1], -v[0] + v[1])$
+    \State $dp[1][1] \gets \textsc{maxOfTwo}(-v[0] - v[1], v[0] - v[1])$
+    \State $dp[2][0] \gets \textsc{maxOfThree}(v[0] + v[1] + v[2], dp[0][1] + v[1] + v[2], dp[1][1] + v[2])$
+    \State $dp[2][1] \gets \textsc{maxOfThree}(-v[0] - v[1] - v[2], dp[0][0] - v[1] - v[2], dp[1][0] - v[2])$
+    
+    \For{$i \gets 3$ \textbf{to} $n-1$}
+        \State $dp[i][0] \gets \textsc{maxOfThree}(dp[i - 1][1] + v[i], dp[i - 2][1] + v[i - 1] + v[i], dp[i - 3][1] + v[i - 2] + v[i - 1] + v[i])$
+        \State $dp[i][1] \gets \textsc{maxOfThree}(dp[i - 1][0] - v[i], dp[i - 2][0] - v[i - 1] - v[i], dp[i - 3][0] - v[i - 2] - v[i - 1] - v[i])$
+    \EndFor
+    
+    \State \Return $\max(dp[n - 1][0], dp[n - 1][1])$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+\end{document}
