@@ -2,21 +2,67 @@
 #define ll long long
 using namespace std;
 
-int main() {
-    int V=12;
-    vector<vector<int>> edges={{0,1},{1,3},{3,2},{2,4},{4,5},{5,6},{6,8},{8,7},{7,9},{9,10},{10,11},{0,3},{3,4},{3,6},{6,7},{2,5},{8,9},{6,9},{9,11},{2,6},{3,5},{4,6}};
-    vector<vector<int>> adj(V);
-    for(int i=0;i<edges.size();i++){
-        adj[edges[i][0]].push_back(edges[i][1]);
+class Graph {
+    int V;
+
+public:
+    vector<vector<int>> adj;
+    Graph(int V) {
+        this->V = V;
+        adj.resize(V);
     }
-    vector<int> topo={0,1,3,2,4,5,6,8,7,9,10,11};
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+    }
+    void DFSVisit(int v, vector<bool>& visited, stack<int>& Stack) {
+        visited[v] = true;
+        for (int i = 0; i < adj[v].size(); ++i) {
+            int adjacent = adj[v][i];
+            if (!visited[adjacent])
+                DFSVisit(adjacent, visited, Stack);
+        }
+        Stack.push(v);
+    }
+
+    vector<int> topologicalSort() {
+        vector<bool> visited(V, false);
+        stack<int> Stack;
+        for (int i = 0; i < V; ++i)
+            if (!visited[i])
+                DFSVisit(i, visited, Stack);
+        vector<int> topologicalOrder;
+        while (!Stack.empty()) {
+            topologicalOrder.push_back(Stack.top());
+            Stack.pop();
+        }
+        return topologicalOrder;
+    }
+};
+
+int main() {
+    int V,E;
+    cout<<"Input V and E";
+    cin>>V>>E;
+    cout<<"Input s and t";
+    Graph g(V);
+    int s,t;
+    cin>>s>>t;
+    cout<<"Input the graph edges";
+    for(int i=0;i<E;i++){
+        int a,b;
+        cin>>a>>b;
+        g.addEdge(a,b);
+    }
+
+    vector<vector<int>> adj=g.adj;
+    vector<int> topo=g.topologicalSort();
     vector<int> cutVertex={};
     vector<int> index(V);
     for(int i=0;i<topo.size();i++){
         index[topo[i]]=i;
     }
     int mx=-1;
-    for(int i=0;i<topo.size()-1;i++){
+    for(int i=index[s];i<index[t];i++){
         int v=topo[i];
         if(v==topo[mx]){
             cutVertex.push_back(v);
@@ -31,4 +77,6 @@ int main() {
         cout<<cutVertex[i]<<' ';
     }
     return 0;
+
+
 }
