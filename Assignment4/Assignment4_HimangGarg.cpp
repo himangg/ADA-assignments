@@ -2,58 +2,39 @@
 #define ll long long
 using namespace std;
 
-class Graph {
-    int V;
-
+class DAG {
 public:
+    int V;
     vector<vector<int>> adj;
-    Graph(int V) {
+
+    void DFSVisit(int v, vector<bool>& visited, vector<int>& postOrder) {
+        visited[v] = true;
+        for (int i = 0; i < adj[v].size(); ++i)
+            if (!visited[adj[v][i]])
+                DFSVisit(adj[v][i], visited, postOrder);
+        postOrder.push_back(v);
+    }
+
+    DAG(int V) {
         this->V = V;
         adj.resize(V);
     }
-    void addEdge(int u, int v) {
-        adj[u].push_back(v);
-    }
-    void DFSVisit(int v, vector<bool>& visited, stack<int>& Stack) {
-        visited[v] = true;
-        for (int i = 0; i < adj[v].size(); ++i) {
-            int adjacent = adj[v][i];
-            if (!visited[adjacent])
-                DFSVisit(adjacent, visited, Stack);
-        }
-        Stack.push(v);
+
+    void addEdge(int v, int w) {
+        adj[v].push_back(w);
     }
 
     vector<int> topologicalSort() {
         vector<bool> visited(V, false);
-        stack<int> Stack;
+        vector<int> postOrder;
         for (int i = 0; i < V; ++i)
             if (!visited[i])
-                DFSVisit(i, visited, Stack);
-        vector<int> topologicalOrder;
-        while (!Stack.empty()) {
-            topologicalOrder.push_back(Stack.top());
-            Stack.pop();
-        }
-        return topologicalOrder;
+                DFSVisit(i, visited, postOrder);
+        return postOrder;
     }
 };
 
-int main() {
-    int V,E;
-    cout<<"Input V and E";
-    cin>>V>>E;
-    cout<<"Input s and t";
-    Graph g(V);
-    int s,t;
-    cin>>s>>t;
-    cout<<"Input the graph edges";
-    for(int i=0;i<E;i++){
-        int a,b;
-        cin>>a>>b;
-        g.addEdge(a,b);
-    }
-
+void CutVertex(int V,int E,int s,int t,DAG g){
     vector<vector<int>> adj=g.adj;
     vector<int> topo=g.topologicalSort();
     vector<int> cutVertex={};
@@ -76,7 +57,22 @@ int main() {
     for(int i=0;i<cutVertex.size();i++){
         cout<<cutVertex[i]<<' ';
     }
+}
+
+int main() {
+    int V,E;
+    cout<<"Input V and E";
+    cin>>V>>E;
+    cout<<"Input s and t";
+    DAG g(V);
+    int s,t;
+    cin>>s>>t;
+    cout<<"Input the graph edges";
+    for(int i=0;i<E;i++){
+        int a,b;
+        cin>>a>>b;
+        g.addEdge(a,b);
+    }
+    CutVertex(V,E,s,t,g);
     return 0;
-
-
 }
