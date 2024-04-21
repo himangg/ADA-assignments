@@ -1,0 +1,163 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{hyperref}
+
+\title{Theory Assignment-5: ADA Winter-2024}
+\author{Himang Chandra Garg (2022214) \and Nishil Agarwal (2022334)}
+
+\date{}
+\begin{document}
+
+\maketitle
+\vspace{2cm}
+\section{Preprocessing}
+Not Applicable.
+\\
+\section{Formulation of problem}
+\vspace{0.5cm}
+\begin{figure}[h]
+    \centering    
+    \includegraphics[width=1\textwidth]{Untitled.png}
+    \caption{This is an example image.}
+    \label{fig:example}
+\end{figure}
+\vspace{0.5cm}
+\begin{enumerate}
+    \item We create source vertex S and sink vertex T. 
+    \item We represent each box as a vertex and store its dimensions in it. We create 2 copies of these sets of vertices A, B. 
+    \item Each vertex u in A is connected by edge (s,u). 
+    \item Each vertex v in B connects to t by (v,t).
+    \item An edge is created between a vertex of A and a vertex of B if all 3 dimensions of A are smaller than all the 3 dimensions of B.
+    \item For each edge we will assign capacity as 1.
+    \\
+\end{enumerate}
+\section{Justification for correctness}
+\subsection{Claim 1}
+For every vertex u in set A, at most only 1 outgoing edge can have flow value 1.\\
+This is because a single box can only be stored within 1 single another box. i.e. 1 box from A can only nest inside 1 box from B.
+\subsection{Claim 2}
+For every vertex in set B, at most only 1 incoming edge may have flow 1.\\
+This is because only at most 1 box can be stored inside another box. i.e. only 1 box from A may be nested in B.
+\subsection{Reasoning}
+Let’s say R is maxflow for a specific set of boxes.\\
+This means that there are exactly R boxes in A that can be nested into another box. Also, there are exactly R boxes in set B which can house a box. \\
+For every box that can be nested from set A to some other box of B, it essentially becomes invisible. The number of boxes visible to a person = Total number of boxes – boxes that are not visible. \\
+Hence, R represents max number of boxes which we can vanish from sight. N-R, represents minimum number of boxes that we will see.
+\\
+\section{Time Complexity}
+\subsection{Construction of Network Flow}
+Construction takes \(O(N^{2}\)) time.\\
+First, we create all vertices, duplicate vertices, and connect them to \(S\) and \(T\) respectively, requiring \(O(V)\) time.\\
+Then, we iterate over the list of vertices. In each iteration, we get vertex \(u\). Then, we iterate over all the vertices in the list and create an edge \((u,v)\) for each vertex \(v\) which has all dimensions greater than \(u\). This requires \(O(V^{2}\)) time.\\
+Thus, construction requires overall \(O(V+V^{2})\)) time \(= O(V^{2}\)).
+\subsection{Ford-Fulkerson}
+Ford-Fulkerson's algorithm runs in \(O(\text{value}(\text{flow})(|V| + |E|))\) time.\\
+Our ford-fulkerson algorithm uses BFS to find paths from S to T. This requires O(V+E) time. \\
+In worst case we may need to find O(max(flow)) different paths since each path may be such that it only increases the flow by 1.\\
+In our code we run it only 1 time so time complexity for getting final answer is \(O(\text{value}(\text{flow})(|V| + |E|))\) only.\\\\
+Our overall time complexity for whole problem is \(O(\text{value}(\text{flow})(|V| + |E|))+(|V|^{2}\)) = \(O(\text{value}(\text{flow}(|V| + |E|))\) only.
+\\
+Since max flow can at most be V so max time complexity is \(O(V^{3}\)) = \(O(N^{3}\))
+\section{Pseudocode}
+\begin{algorithm}
+\caption{Solving Algorithm}\label{maxflow}
+\begin{algorithmic}[1]
+\Procedure{solve}{}
+    \State $n \gets$ input from user \Comment{Read the number of vertices}
+    \State $vertexes \gets$ empty list
+    
+    \State $s \gets$ new vertex with dimension $(0, 0, 0)$
+    \State add $s$ to $vertexes$
+    \State $t \gets$ new vertex with dimension $(0, 0, 0)$
+    \State add $t$ to $vertexes$
+    
+    \For{$i$ from $1$ to $n$} \Comment
+        \State read $a, b, c$ from user \Comment{Read dimensions of vertex}
+        \State $v \gets$ new vertex with dimension $(a, b, c)$ \Comment{Create new vertex}
+        \State add $v$ to $vertexes$ \Comment{Add vertex to list}
+        \State add edge from $s$ to $v$ \Comment{Add edge from source to vertex}
+    \EndFor
+    
+    \For{$i$ from $1$ to $n$} \Comment{Iterate over vertices again}
+        \State $v \gets$ new vertex with same dimensions respectively\Comment{Create a copy of vertex}
+        \State add $v$ to $vertexes$ \Comment{Add copy vertex to list}
+        \State add edge from $v$ to $t$ \Comment{Add edge from vertex to sink}
+    \EndFor
+    
+    \For{$i$ from vertexes[2] to vertexes[n+1]} \Comment{Iterate over vertices excluding source and sink}
+        \For{$j$ from vertexes[n+2] to vertexes[2*(n+1)]} \Comment{Iterate over vertices excluding source and sink}
+            \If{$\text{j.dim}[0] > \text{i.dim}[0]$ \textbf{same for other dimensions} } \Comment{Check if dimensions of $j$ are greater than $i$}
+                \State add edge from $i$ to $j$ \Comment{Add edge from vertex $i$ to vertex $j$}
+            \EndIf
+        \EndFor
+    \EndFor
+    
+    \State $maxFlow \gets$ \textsc{fordFulkerson}($vertexes$, $s$, $t$) \Comment{Compute maximum flow using Ford-Fulkerson algorithm}
+    \State \textbf{output} Minimum number of boxes visible: $n-maxFlow$ \Comment{Output n- maximum flow}
+\EndProcedure
+
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Breadth-First Search (BFS)}\label{bfs}
+\begin{algorithmic}[1]
+\Function{bfs}{vertexes, parent, s, t}
+    \State fill parent with -1 \Comment{Initialize parent array}
+    \State parent[s] $\gets$ -2 \Comment{Mark source as visited}
+
+    \State create an empty queue $q$
+    \State $q$.push($(s, \infty)$) \Comment{Push source with infinite capacity}
+
+    \While{$q$ is not empty}
+        \State $(u, \text{min\_capacity}) \gets q$.front()
+        \State $q$.pop()
+
+    \For{$v\_index$ in vertexes[u] $\rightarrow$ adj}           \Comment{Iterate over adjacent vertices of $u$}
+
+            \If{parent[$v\_index$] $==$ -1}
+                \State parent[$v\_index$] $\gets$ u
+                \State new\_flow $\gets \min(\text{min\_capacity}, 1)$
+                \If{$v\_index$ $==$ t}
+                    \State \textbf{return} new\_flow
+                \EndIf
+                \State $q$.push($(v\_index, \text{new\_flow})$)
+            \EndIf
+        \EndFor
+    \EndWhile
+    \State \textbf{return} 0
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+\caption{Ford-Fulkerson Algorithm}\label{fordfulkerson}
+\begin{algorithmic}[1]
+\Function{fordFulkerson}{$\text{vertexes}, s, t$}
+    \State $maxFlow \gets 0$
+    \State create a vector $parent$ of size $\text{vertexes.size()}$
+
+    \While{$\text{new\_flow} = \text{bfs}(\text{vertexes}, \text{parent}, s, t)$}
+        \State $maxFlow \gets \text{maxFlow} + \text{new\_flow}$
+        \State $cur \gets t$
+        \While{$cur \neq s$}
+            \State $prev \gets \text{parent}[cur]$
+            \State $\text{vertexes}[prev]\rightarrow\text{adj}.\text{remove}(\text{cur})$
+            \State $\text{vertexes}[cur]\rightarrow\text{adj}.push\_back(prev)$
+            \State $cur \gets prev$
+        \EndWhile
+    \EndWhile
+    \State \textbf{return} $maxFlow$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+\end{document}
